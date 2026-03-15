@@ -3913,76 +3913,70 @@
   </div>
   <div class="save-badge" id="save-badge">✓ SAVED</div>
   
-
 <script>
 
 const keys = ["subhanallah","alhamdulillah","allahuakbar"];
-
 let currentIndex = 0;
 let currentKey = keys[0];
-let counters = {};
 
-// faster proxy function
-function api(path){
-  return "https://api.allorigins.win/raw?url=" +
-  encodeURIComponent("https://api.counterapi.dev/v1/ashpak-momin/"+path);
+function jsonp(url){
+  const s = document.createElement("script");
+  s.src = url;
+  document.body.appendChild(s);
 }
 
-async function loadCounters(){
-
-  for(let i=0;i<keys.length;i++){
-
-    try{
-
-      const res = await fetch(api(keys[i]));
-      const data = await res.json();
-
-      counters[keys[i]] = data.count || 0;
-
-      document.getElementById("ts-t"+i).innerText = counters[keys[i]];
-
-      if(i === currentIndex){
-        document.getElementById("ts-cnt").innerText = counters[keys[i]];
-      }
-
-    }catch(e){
-      console.log(e);
-    }
-
-  }
-
+function loadCounter(i){
+  const key = keys[i];
+  jsonp("https://api.countapi.xyz/get/ashpak-momin/"+key+"?callback=counterLoaded"+i);
 }
 
-async function increaseTasbeeh(){
+function increaseTasbeeh(){
+  jsonp("https://api.countapi.xyz/hit/ashpak-momin/"+currentKey+"?callback=counterHit"+currentIndex);
+}
 
-  // instant UI update
-  counters[currentKey]++;
-  document.getElementById("ts-cnt").innerText = counters[currentKey];
-  document.getElementById("ts-t"+currentIndex).innerText = counters[currentKey];
+function counterLoaded0(d){
+  document.getElementById("ts-t0").innerText = d.value;
+  if(currentIndex===0) document.getElementById("ts-cnt").innerText = d.value;
+}
+function counterLoaded1(d){
+  document.getElementById("ts-t1").innerText = d.value;
+  if(currentIndex===1) document.getElementById("ts-cnt").innerText = d.value;
+}
+function counterLoaded2(d){
+  document.getElementById("ts-t2").innerText = d.value;
+  if(currentIndex===2) document.getElementById("ts-cnt").innerText = d.value;
+}
 
-  // background update
-  fetch(api(currentKey+"/up"));
-
+function counterHit0(d){
+  document.getElementById("ts-cnt").innerText = d.value;
+  document.getElementById("ts-t0").innerText = d.value;
+}
+function counterHit1(d){
+  document.getElementById("ts-cnt").innerText = d.value;
+  document.getElementById("ts-t1").innerText = d.value;
+}
+function counterHit2(d){
+  document.getElementById("ts-cnt").innerText = d.value;
+  document.getElementById("ts-t2").innerText = d.value;
 }
 
 function setTs(i){
-
   currentIndex = i;
   currentKey = keys[i];
 
   document.querySelectorAll(".ts-opt").forEach(x=>x.classList.remove("on"));
   document.getElementById("ts"+i).classList.add("on");
 
-  document.getElementById("ts-cnt").innerText = counters[currentKey] || 0;
-
+  document.getElementById("ts-cnt").innerText = "...";
+  loadCounter(i);
 }
 
 document.addEventListener("DOMContentLoaded",()=>{
-
   document.getElementById("ts-big").onclick = increaseTasbeeh;
 
-  loadCounters();
-
+  loadCounter(0);
+  loadCounter(1);
+  loadCounter(2);
 });
 
 </script>
