@@ -7,7 +7,7 @@
 
   <!-- End Google Tag Manager -->
   <title>Sadqa-e-Jariya</title>
-  <link rel="manifest" href="manifest.json">
+  <!-- <link rel="manifest" href="manifest.json"> -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -3820,8 +3820,8 @@
       color: rgba(212, 160, 23, .8)
     }
   </style>
-  <link rel="manifest" href="/ramadan-2026-india/manifest.webmanifest">
-  <script id="vite-plugin-pwa:register-sw" src="/ramadan-2026-india/registerSW.js"></script>
+  <!-- <link rel="manifest" href="/ramadan-2026-india/manifest.webmanifest"> -->
+  <!-- <script id="vite-plugin-pwa:register-sw" src="/ramadan-2026-india/registerSW.js"></script> -->
 </head>
 
 <body>
@@ -3914,7 +3914,6 @@
   <div class="save-badge" id="save-badge">✓ SAVED</div>
   
 
-
 <script>
 
 const keys = ["subhanallah","alhamdulillah","allahuakbar"];
@@ -3922,66 +3921,50 @@ const keys = ["subhanallah","alhamdulillah","allahuakbar"];
 let currentIndex = 0;
 let currentKey = keys[0];
 
-function jsonp(url){
-  const s = document.createElement("script");
-  s.src = url;
-  document.body.appendChild(s);
+function apiUrl(path){
+  return "https://api.allorigins.win/raw?url=" +
+         encodeURIComponent("https://api.counterapi.dev/v1/ashpak-momin/" + path);
 }
 
-function loadCounter(index){
+async function loadCounter(index){
 
-  const key = keys[index];
+  try{
 
-  jsonp(
-    "https://api.countapi.xyz/get/ashpak-momin/"+key+
-    "?callback=counterLoaded"+index
-  );
+    const res = await fetch(apiUrl(keys[index]));
+    const data = await res.json();
 
-}
+    const total = document.getElementById("ts-t"+index);
+    if(total){
+      total.innerText = data.count || 0;
+    }
 
-function increaseTasbeeh(){
+    if(index === currentIndex){
+      const main = document.getElementById("ts-cnt");
+      if(main){
+        main.innerText = data.count || 0;
+      }
+    }
 
-  jsonp(
-    "https://api.countapi.xyz/hit/ashpak-momin/"+currentKey+
-    "?callback=counterHit"+currentIndex
-  );
-
-}
-
-function counterLoaded0(data){
-  document.getElementById("ts-t0").innerText = data.value || 0;
-  if(currentIndex===0){
-    document.getElementById("ts-cnt").innerText = data.value || 0;
+  }catch(e){
+    console.log(e);
   }
+
 }
 
-function counterLoaded1(data){
-  document.getElementById("ts-t1").innerText = data.value || 0;
-  if(currentIndex===1){
-    document.getElementById("ts-cnt").innerText = data.value || 0;
+async function increaseTasbeeh(){
+
+  try{
+
+    const res = await fetch(apiUrl(currentKey + "/up"));
+    const data = await res.json();
+
+    document.getElementById("ts-cnt").innerText = data.count;
+    document.getElementById("ts-t"+currentIndex).innerText = data.count;
+
+  }catch(e){
+    console.log(e);
   }
-}
 
-function counterLoaded2(data){
-  document.getElementById("ts-t2").innerText = data.value || 0;
-  if(currentIndex===2){
-    document.getElementById("ts-cnt").innerText = data.value || 0;
-  }
-}
-
-function counterHit0(data){
-  document.getElementById("ts-cnt").innerText = data.value;
-  document.getElementById("ts-t0").innerText = data.value;
-}
-
-function counterHit1(data){
-  document.getElementById("ts-cnt").innerText = data.value;
-  document.getElementById("ts-t1").innerText = data.value;
-}
-
-function counterHit2(data){
-  document.getElementById("ts-cnt").innerText = data.value;
-  document.getElementById("ts-t2").innerText = data.value;
 }
 
 function setTs(i){
@@ -4002,13 +3985,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   document.getElementById("ts-big").onclick = increaseTasbeeh;
 
-  loadCounter(0);
-  loadCounter(1);
-  loadCounter(2);
+  // load all counters when page opens
+  keys.forEach((k,i)=>{
+    loadCounter(i);
+  });
 
 });
 
 </script>
-
 
 </html>
