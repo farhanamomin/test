@@ -3922,57 +3922,66 @@ const keys = ["subhanallah","alhamdulillah","allahuakbar"];
 let currentIndex = 0;
 let currentKey = keys[0];
 
-async function loadAllCounters(){
+function jsonp(url){
+  const s = document.createElement("script");
+  s.src = url;
+  document.body.appendChild(s);
+}
 
-  for(let i=0;i<keys.length;i++){
+function loadCounter(index){
 
-    try{
+  const key = keys[index];
 
-      const res = await fetch(
-        "https://api.counterapi.dev/v1/ashpak-momin/" + keys[i],
-        {cache:"no-store"}
-      );
-
-      const data = await res.json();
-
-      const total = document.getElementById("ts-t"+i);
-      if(total){
-        total.innerText = data.count || 0;
-      }
-
-      if(i === currentIndex){
-        const main = document.getElementById("ts-cnt");
-        if(main){
-          main.innerText = data.count || 0;
-        }
-      }
-
-    }catch(e){
-      console.log(e);
-    }
-
-  }
+  jsonp(
+    "https://api.countapi.xyz/get/ashpak-momin/"+key+
+    "?callback=counterLoaded"+index
+  );
 
 }
 
-async function increaseTasbeeh(){
+function increaseTasbeeh(){
 
-  try{
+  jsonp(
+    "https://api.countapi.xyz/hit/ashpak-momin/"+currentKey+
+    "?callback=counterHit"+currentIndex
+  );
 
-    const res = await fetch(
-      "https://api.counterapi.dev/v1/ashpak-momin/" + currentKey + "/up",
-      {cache:"no-store"}
-    );
+}
 
-    const data = await res.json();
-
-    document.getElementById("ts-cnt").innerText = data.count;
-    document.getElementById("ts-t"+currentIndex).innerText = data.count;
-
-  }catch(e){
-    console.log(e);
+function counterLoaded0(data){
+  document.getElementById("ts-t0").innerText = data.value || 0;
+  if(currentIndex===0){
+    document.getElementById("ts-cnt").innerText = data.value || 0;
   }
+}
 
+function counterLoaded1(data){
+  document.getElementById("ts-t1").innerText = data.value || 0;
+  if(currentIndex===1){
+    document.getElementById("ts-cnt").innerText = data.value || 0;
+  }
+}
+
+function counterLoaded2(data){
+  document.getElementById("ts-t2").innerText = data.value || 0;
+  if(currentIndex===2){
+    document.getElementById("ts-cnt").innerText = data.value || 0;
+  }
+}
+
+function counterHit0(data){
+  document.getElementById("ts-cnt").innerText = data.value;
+  document.getElementById("ts-t0").innerText = data.value;
+}
+
+function counterHit1(data){
+  document.getElementById("ts-cnt").innerText = data.value;
+  document.getElementById("ts-t1").innerText = data.value;
+}
+
+function counterHit2(data){
+  document.getElementById("ts-cnt").innerText = data.value;
+  document.getElementById("ts-t2").innerText = data.value;
 }
 
 function setTs(i){
@@ -3983,24 +3992,23 @@ function setTs(i){
   document.querySelectorAll(".ts-opt").forEach(x=>x.classList.remove("on"));
   document.getElementById("ts"+i).classList.add("on");
 
-  document.getElementById("ts-cnt").innerText = "...";
+  document.getElementById("ts-cnt").innerText="...";
 
-  loadAllCounters();
+  loadCounter(i);
 
 }
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded",()=>{
 
-  const btn = document.getElementById("ts-big");
-  if(btn){
-    btn.onclick = increaseTasbeeh;
-  }
+  document.getElementById("ts-big").onclick = increaseTasbeeh;
 
-  loadAllCounters();
+  loadCounter(0);
+  loadCounter(1);
+  loadCounter(2);
 
 });
 
 </script>
-</body>
+
 
 </html>
