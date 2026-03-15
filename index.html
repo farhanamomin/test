@@ -3920,50 +3920,48 @@ const keys = ["subhanallah","alhamdulillah","allahuakbar"];
 
 let currentIndex = 0;
 let currentKey = keys[0];
+let counters = {};
 
-function apiUrl(path){
+// faster proxy function
+function api(path){
   return "https://api.allorigins.win/raw?url=" +
-         encodeURIComponent("https://api.counterapi.dev/v1/ashpak-momin/" + path);
+  encodeURIComponent("https://api.counterapi.dev/v1/ashpak-momin/"+path);
 }
 
-async function loadCounter(index){
+async function loadCounters(){
 
-  try{
+  for(let i=0;i<keys.length;i++){
 
-    const res = await fetch(apiUrl(keys[index]));
-    const data = await res.json();
+    try{
 
-    const total = document.getElementById("ts-t"+index);
-    if(total){
-      total.innerText = data.count || 0;
-    }
+      const res = await fetch(api(keys[i]));
+      const data = await res.json();
 
-    if(index === currentIndex){
-      const main = document.getElementById("ts-cnt");
-      if(main){
-        main.innerText = data.count || 0;
+      counters[keys[i]] = data.count || 0;
+
+      document.getElementById("ts-t"+i).innerText = counters[keys[i]];
+
+      if(i === currentIndex){
+        document.getElementById("ts-cnt").innerText = counters[keys[i]];
       }
+
+    }catch(e){
+      console.log(e);
     }
 
-  }catch(e){
-    console.log(e);
   }
 
 }
 
 async function increaseTasbeeh(){
 
-  try{
+  // instant UI update
+  counters[currentKey]++;
+  document.getElementById("ts-cnt").innerText = counters[currentKey];
+  document.getElementById("ts-t"+currentIndex).innerText = counters[currentKey];
 
-    const res = await fetch(apiUrl(currentKey + "/up"));
-    const data = await res.json();
-
-    document.getElementById("ts-cnt").innerText = data.count;
-    document.getElementById("ts-t"+currentIndex).innerText = data.count;
-
-  }catch(e){
-    console.log(e);
-  }
+  // background update
+  fetch(api(currentKey+"/up"));
 
 }
 
@@ -3975,9 +3973,7 @@ function setTs(i){
   document.querySelectorAll(".ts-opt").forEach(x=>x.classList.remove("on"));
   document.getElementById("ts"+i).classList.add("on");
 
-  document.getElementById("ts-cnt").innerText="...";
-
-  loadCounter(i);
+  document.getElementById("ts-cnt").innerText = counters[currentKey] || 0;
 
 }
 
@@ -3985,13 +3981,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   document.getElementById("ts-big").onclick = increaseTasbeeh;
 
-  // load all counters when page opens
-  keys.forEach((k,i)=>{
-    loadCounter(i);
-  });
+  loadCounters();
 
 });
 
 </script>
-
 </html>
